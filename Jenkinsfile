@@ -37,16 +37,17 @@ pipeline {
         stage('E2'){
             agent{
                 docker{
-                    image 'mcr.microsoft.com/playwright:v1.62.0-noble'
+                    image 'mcr.microsoft.com/playwright:v1.39.0-noble'
                     reuseNode true
                 }
             }
             steps{
                 sh '''
-                    npm install  serve
-                    node_module/.bin/serve -s build &
+                    npm install serve
+                    node_modules/.bin/serve -s build &
                     sleep 10
                     npx playwright test
+                    npx playwright test --reporter=line
                 '''
             }
         }
@@ -55,6 +56,7 @@ pipeline {
     post{
         always{
             junit 'jest-results/junit.xml'
+            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Report', reportTitles: '', useWrapperFileDirectly: true])
         }
     }
 }
